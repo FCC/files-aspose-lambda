@@ -13,6 +13,10 @@ public class LambdaFunctionHandler implements RequestHandler<SNSEvent, String> {
 	
     @Override
     public String handleRequest(SNSEvent event, Context context) {
+    	
+    	String awsRegion = System.getenv("AWS_REGION");
+        context.getLogger().log("Running in : " + awsRegion);
+ 
         context.getLogger().log("Received event: " + event);
         String message = event.getRecords().get(0).getSNS().getMessage();
         context.getLogger().log("From SNS: " + message);
