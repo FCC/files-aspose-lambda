@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.amazonaws.lambda</groupId>
-  <artifactId>demo</artifactId>
+  <artifactId>files-aspose-lambda</artifactId>
   <version>1.0.0</version>
   <packaging>jar</packaging>
 
