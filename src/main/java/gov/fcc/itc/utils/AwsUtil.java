@@ -90,7 +90,7 @@ public class AwsUtil
 		//writing to S3
 		try {
 			 CopyObjectRequest copyObjRequest = new CopyObjectRequest(
-	            		bucketName, sourceFileName, bucketName, destinationFilename).withCannedAccessControlList(CannedAccessControlList.PublicReadWrite);
+	            		bucketName, sourceFileName, bucketName, destinationFilename);
 			 client.copyObject(copyObjRequest);
 		} catch (AmazonServiceException ase) {
 			System.out.println("Caught an AmazonServiceException, which "
@@ -132,7 +132,7 @@ public class AwsUtil
 		
 		//writing to S3
 		try	{
-			client.putObject(new PutObjectRequest(bucketName, destinationFilename, sourceContent, metaData).withCannedAcl(CannedAccessControlList.PublicReadWrite));
+			client.putObject(new PutObjectRequest(bucketName, destinationFilename, sourceContent, metaData));
 		} catch (AmazonServiceException ase) {
 			System.out.println("Caught an AmazonServiceException, which "
 					+ "means your request made it "
