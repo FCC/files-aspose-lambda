@@ -1,31 +1,45 @@
 package gov.fcc.fileservice.lampufproc;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.google.gson.*;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
+
+import gov.fcc.itc.utils.Constants;
+import gov.fcc.itc.utils.FileUtil;
+import gov.fcc.itc.utils.PostUploadFileProcessor;
 
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 
 public class LambdaFunctionHandler implements RequestHandler<SNSEvent, String> {
 
 	String bucket, uuid, fileName, hook, reportBackQueue;
-	JsonArray process;
+	JSONArray process;
+	Context mainContext;
+	LambdaLogger logger;
 	
     @Override
     public String handleRequest(SNSEvent event, Context context) {
 
-    	context.getLogger().log("Received event: " + event);
+    	mainContext = context;
+    	logger = mainContext.getLogger();    	
     	
     	GetEnvironment();
-        context.getLogger().log("Report Back : " + reportBackQueue);
+    	//logger.log("Report Back : " + reportBackQueue);
         
         String message = ParseIncomingMessage(event);        
-        context.getLogger().log("Bucket : " + bucket);
-        context.getLogger().log("UUID : " + uuid);
-        context.getLogger().log("FileName : " + fileName);
-        context.getLogger().log("Process : " + process);
-        context.getLogger().log("Hook : " + hook);        	
+        //logger.log("Bucket : " + bucket);
+        //logger.log("UUID : " + uuid);
+        //logger.log("FileName : " + fileName);
+        //logger.log("Process : " + process);
+        //logger.log("Hook : " + hook);        	
         
+		processFile();
+		
         return message;
     }
     
@@ -34,21 +48,74 @@ public class LambdaFunctionHandler implements RequestHandler<SNSEvent, String> {
     }
     
     private String ParseIncomingMessage(SNSEvent event) {
+    	
         String message = event.getRecords().get(0).getSNS().getMessage();
-        JsonObject jsonMessage = new JsonParser().parse(message).getAsJsonObject();
-        
-        bucket = jsonMessage.get("bucket").getAsString();
-        uuid = jsonMessage.get("uuid").getAsString();
-        fileName = jsonMessage.get("fileName").getAsString();
-        process = jsonMessage.get("process").getAsJsonArray();
 
-        JsonElement jhook = jsonMessage.get("hook");
-        if (jhook != null) {
-            hook = jhook.getAsString();
-        } else {
-            hook = null;
-        }
+        JSONParser parser = new JSONParser();
+    	
+    	try {
+    		JSONObject jsonMessage = (JSONObject) parser.parse(message);
+
+    		bucket = (String) jsonMessage.get("bucket");
+            uuid = (String) jsonMessage.get("uuid");
+            fileName = (String) jsonMessage.get("fileName");
+            process = (JSONArray) jsonMessage.get("process");
+            
+            hook = (String) jsonMessage.get("hook");
+    	} catch (ParseException e) {
+    		logger.log("Could not parse incoming message");
+    	}    	
     	return message;
     }
     
+	public void processFile() {
+		final long startTime = System.currentTimeMillis();
+
+		PostUploadFileProcessor pufProc = new PostUploadFileProcessor(process, logger);
+		
+		JSONObject response = null;
+		boolean processedFlag = true;
+		String status = null;
+		String statusMessage = null;
+
+		try {
+			pufProc.LoadSourceFile(bucket, fileName);
+			response = pufProc.ApplyOperations();						
+		    status = Constants.PROCESSING_COMPLETE;
+		    statusMessage = Constants.PROCESSING_SUCCESS_MESSAGE;
+		    
+		} catch (Exception e) {
+			// Set overall failed status 
+			e.printStackTrace();
+			processedFlag = false;
+			statusMessage = e.getMessage();
+			status = Constants.PROCESSING_ERROR;
+		}		
+
+		String sendMessage = 
+				"{\"uuid\":\"" + uuid +
+				"\", \"status\":\"" + status + 
+				"\", \"statusMessage\":\"" + statusMessage + 
+				"\", \"bucket\":\"" + bucket;
+		
+		if (response == null) {
+			sendMessage = sendMessage + "\"}";			
+		} else {
+			sendMessage = sendMessage + 
+					"\", \"processed\":" + response.toString() +
+					"}";						
+		}
+		//queueSender.send(sendMessage);
+		
+		final long endTime = System.currentTimeMillis();
+
+		logger.log("#############" + sendMessage);
+		logger.log("Total execution time: " + (endTime - startTime));
+		logger.log("############:" + fileName);
+		
+		if(!processedFlag)
+		{
+			logger.log("Unable to process the file.");
+		}
+	}
 }

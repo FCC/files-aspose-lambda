@@ -65,10 +65,10 @@ public class PostUploadFileProcessor {
 	
 	private static LambdaLogger logger;
 	
-	public PostUploadFileProcessor(JSONArray ops, Context context) {
+	public PostUploadFileProcessor(JSONArray ops, LambdaLogger l) {
 		operations = ops;		
 		response = new JSONObject();
-		logger = context.getLogger();
+		logger = l;
 	}
 	
 	public void LoadSourceFile(String bucketName, String fileName) throws Exception {
