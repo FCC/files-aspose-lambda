@@ -8,38 +8,38 @@ import com.amazonaws.services.lambda.runtime.events.SNSEvent;
 
 public class LambdaFunctionHandler implements RequestHandler<SNSEvent, String> {
 
-	String bucket, uuid, fileName, hook, reportBack;
+	String bucket, uuid, fileName, hook, reportBackQueue;
 	JsonArray process;
 	
     @Override
     public String handleRequest(SNSEvent event, Context context) {
+
+    	context.getLogger().log("Received event: " + event);
     	
-    	String awsRegion = System.getenv("AWS_REGION");
-        context.getLogger().log("Running in : " + awsRegion);
- 
-        context.getLogger().log("Received event: " + event);
-        String message = event.getRecords().get(0).getSNS().getMessage();
-        context.getLogger().log("From SNS: " + message);
+    	GetEnvironment();
+        context.getLogger().log("Report Back : " + reportBackQueue);
         
-        ParseIncomingMessage(message);
-        
+        String message = ParseIncomingMessage(event);        
         context.getLogger().log("Bucket : " + bucket);
         context.getLogger().log("UUID : " + uuid);
         context.getLogger().log("FileName : " + fileName);
         context.getLogger().log("Process : " + process);
-        context.getLogger().log("Report Back : " + reportBack);
         context.getLogger().log("Hook : " + hook);        	
         
         return message;
     }
     
-    private void ParseIncomingMessage(String message) {
+    private void GetEnvironment() {
+    	reportBackQueue = System.getenv("REPORT_BACK_QUEUE");
+    }
+    
+    private String ParseIncomingMessage(SNSEvent event) {
+        String message = event.getRecords().get(0).getSNS().getMessage();
         JsonObject jsonMessage = new JsonParser().parse(message).getAsJsonObject();
         
         bucket = jsonMessage.get("bucket").getAsString();
         uuid = jsonMessage.get("uuid").getAsString();
         fileName = jsonMessage.get("fileName").getAsString();
-        reportBack = jsonMessage.get("reportBack").getAsString();
         process = jsonMessage.get("process").getAsJsonArray();
 
         JsonElement jhook = jsonMessage.get("hook");
@@ -48,7 +48,7 @@ public class LambdaFunctionHandler implements RequestHandler<SNSEvent, String> {
         } else {
             hook = null;
         }
-    	
+    	return message;
     }
     
 }
