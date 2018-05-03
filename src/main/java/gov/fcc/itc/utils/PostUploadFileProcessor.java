@@ -11,12 +11,12 @@ import org.json.simple.JSONValue;
 import org.json.simple.JSONArray;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
 import gov.fcc.itc.utils.AwsUtil;
 import gov.fcc.itc.utils.FileUtil;
 import gov.fcc.itc.utils.Constants;
+import gov.fcc.itc.utils.AsposeLicense;
 
 import com.aspose.cells.*;
 import com.aspose.words.*;
@@ -69,6 +69,11 @@ public class PostUploadFileProcessor {
 		operations = ops;		
 		response = new JSONObject();
 		logger = l;
+		try {
+			AsposeLicense.applyLicense();
+		} catch (Exception e) {
+			logger.log("Unable to apply Aspose license, error : " + e);;
+		}
 	}
 	
 	public void LoadSourceFile(String bucketName, String fileName) throws Exception {

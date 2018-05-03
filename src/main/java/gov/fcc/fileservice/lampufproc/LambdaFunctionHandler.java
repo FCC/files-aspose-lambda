@@ -9,8 +9,11 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.model.*;
+
 import gov.fcc.itc.utils.Constants;
-import gov.fcc.itc.utils.FileUtil;
 import gov.fcc.itc.utils.PostUploadFileProcessor;
 
 import com.amazonaws.services.lambda.runtime.events.SNSEvent;
@@ -105,7 +108,8 @@ public class LambdaFunctionHandler implements RequestHandler<SNSEvent, String> {
 					"\", \"processed\":" + response.toString() +
 					"}";						
 		}
-		//queueSender.send(sendMessage);
+		
+		reportBack(sendMessage);
 		
 		final long endTime = System.currentTimeMillis();
 
@@ -117,5 +121,10 @@ public class LambdaFunctionHandler implements RequestHandler<SNSEvent, String> {
 		{
 			logger.log("Unable to process the file.");
 		}
+	}
+	
+	private void reportBack(String message) {
+		 final AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
+		 sqs.sendMessage(new SendMessageRequest(reportBackQueue, message));
 	}
 }
