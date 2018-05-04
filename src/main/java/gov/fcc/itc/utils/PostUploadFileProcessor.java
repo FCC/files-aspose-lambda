@@ -61,7 +61,7 @@ public class PostUploadFileProcessor {
 	private static String[] supports_rpn = new String[] {"doc", "docx", "odt", "rtf"};
 
 	private static String[] excel_formats = new String[] {"csv", "xls", "xlsx"};
-	private static String[] known_extensions = new String[] {"bmp", "csv", "doc", "docx", "gif", "htm", "html", "jpeg", "jpg", "mpp", "odt", "pdf", "png", "ppt", "pptx", "psd", "rtf", "tif", "tiff", "txt", "vsd", "wks", "wpd", "xls", "xlsx"};
+	//private static String[] known_extensions = new String[] {"bmp", "csv", "doc", "docx", "gif", "htm", "html", "jpeg", "jpg", "mpp", "odt", "pdf", "png", "ppt", "pptx", "psd", "rtf", "tif", "tiff", "txt", "vsd", "wks", "wpd", "xls", "xlsx"};
 	
 	private static LambdaLogger logger;
 	
@@ -69,11 +69,7 @@ public class PostUploadFileProcessor {
 		operations = ops;		
 		response = new JSONObject();
 		logger = l;
-		try {
-			AsposeLicense.applyLicense();
-		} catch (Exception e) {
-			logger.log("Unable to apply Aspose license, error : " + e);;
-		}
+		AsposeLicense.applyLicense();
 	}
 	
 	public void LoadSourceFile(String bucketName, String fileName) throws Exception {

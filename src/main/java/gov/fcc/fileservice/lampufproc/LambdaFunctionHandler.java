@@ -31,16 +31,8 @@ public class LambdaFunctionHandler implements RequestHandler<SNSEvent, String> {
     	mainContext = context;
     	logger = mainContext.getLogger();    	
     	
-    	GetEnvironment();
-    	//logger.log("Report Back : " + reportBackQueue);
-        
+    	GetEnvironment();        
         String message = ParseIncomingMessage(event);        
-        //logger.log("Bucket : " + bucket);
-        //logger.log("UUID : " + uuid);
-        //logger.log("FileName : " + fileName);
-        //logger.log("Process : " + process);
-        //logger.log("Hook : " + hook);        	
-        
 		processFile();
 		
         return message;
@@ -113,8 +105,8 @@ public class LambdaFunctionHandler implements RequestHandler<SNSEvent, String> {
 		
 		final long endTime = System.currentTimeMillis();
 
-		logger.log("#############" + sendMessage);
-		logger.log("Total execution time: " + (endTime - startTime));
+		logger.log("############" + sendMessage);
+		logger.log("Total file processing time: " + (endTime - startTime));
 		logger.log("############:" + fileName);
 		
 		if(!processedFlag)
