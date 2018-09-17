@@ -2,9 +2,11 @@ package gov.fcc.itc.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -19,6 +21,7 @@ import gov.fcc.itc.utils.Constants;
 import gov.fcc.itc.utils.AsposeLicense;
 
 import com.aspose.cells.*;
+import com.aspose.cells.TxtLoadOptions;
 import com.aspose.words.*;
 import com.aspose.pdf.*;
 import com.aspose.pdf.MemoryCleaner;
@@ -70,6 +73,17 @@ public class PostUploadFileProcessor {
 		response = new JSONObject();
 		logger = l;
 		AsposeLicense.applyLicense();
+
+		List<String> fontPaths = com.aspose.pdf.Document.getLocalFontPaths();
+		fontPaths.add("/var/task/fonts/msttcore/");
+		com.aspose.pdf.Document.setLocalFontPaths(fontPaths);
+		
+		System.out.println("/var/task/fonts/msttcore contents");			
+		File dirVTFM = new File("/var/task/fonts/msttcore");
+		File[] filesListVTFM = dirVTFM.listFiles();
+		for (File file : filesListVTFM) {
+		    System.out.println(file.getName());
+		}
 	}
 	
 	public void LoadSourceFile(String bucketName, String fileName) throws Exception {
@@ -498,6 +512,12 @@ public class PostUploadFileProcessor {
 		
 	private void SaveAsPDF() {
 		String opCode = "pdf";
+
+		System.out.println("Font paths before saving PDF");			
+		List<String> fontPaths = com.aspose.pdf.Document.getLocalFontPaths();
+		for (String path : fontPaths) {
+			System.out.println("Font path : " + path);			
+		}
 
 		String convertedFileName = sourceNameNoExt + Constants.DOT + Constants.EXTENSION_PDF;
 		String destFile = System.getenv("DESTINATION_LOCATION") + convertedFileName;
