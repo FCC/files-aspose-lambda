@@ -78,12 +78,6 @@ public class PostUploadFileProcessor {
 		fontPaths.add("/var/task/fonts/msttcore/");
 		com.aspose.pdf.Document.setLocalFontPaths(fontPaths);
 		
-		System.out.println("/var/task/fonts/msttcore contents");			
-		File dirVTFM = new File("/var/task/fonts/msttcore");
-		File[] filesListVTFM = dirVTFM.listFiles();
-		for (File file : filesListVTFM) {
-		    System.out.println(file.getName());
-		}
 	}
 	
 	public void LoadSourceFile(String bucketName, String fileName) throws Exception {
@@ -513,12 +507,6 @@ public class PostUploadFileProcessor {
 	private void SaveAsPDF() {
 		String opCode = "pdf";
 
-		System.out.println("Font paths before saving PDF");			
-		List<String> fontPaths = com.aspose.pdf.Document.getLocalFontPaths();
-		for (String path : fontPaths) {
-			System.out.println("Font path : " + path);			
-		}
-
 		String convertedFileName = sourceNameNoExt + Constants.DOT + Constants.EXTENSION_PDF;
 		String destFile = System.getenv("DESTINATION_LOCATION") + convertedFileName;
         
@@ -552,7 +540,16 @@ public class PostUploadFileProcessor {
 	    			ByteArrayOutputStream dstStream = new ByteArrayOutputStream();
 	        	   	
 	        	   	try {
-	    	    	   	asposeDocument.save(dstStream, com.aspose.words.SaveFormat.PDF);
+
+	        	   		FontSettings FontSettings = new FontSettings();
+	        	   		String[] fontPaths = new String[]  { 
+	        	   				"/usr/share/fonts/", 
+	        	   				"/var/task/fonts/msttcore/" 
+	        	   				};
+	        	   		FontSettings.setFontsFolders(fontPaths, true);
+	        	   		asposeDocument.setFontSettings(FontSettings);       	   		
+	        	   		asposeDocument.save(dstStream, com.aspose.words.SaveFormat.PDF);
+	        	   		
 	    	    	   	InputStream srcStream =  new ByteArrayInputStream(dstStream.toByteArray());
 	    	    	   	
 	    	    	    ObjectMetadata meta = new ObjectMetadata();
