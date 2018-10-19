@@ -177,9 +177,10 @@ public class PostUploadFileProcessor {
 	
 	private void ApplyExports() {
 		// Handle known formats, ignore unknown
+		// Save as original format must go first to avoid having global options affect the content
+		if (inOperations("orig")) SaveAsOriginalFormat();		
 		if (inOperations("pdf")) SaveAsPDF();		
 		if (inOperations("txt")) SaveAsTXT();
-		if (inOperations("orig")) SaveAsOriginalFormat();		
 	}
 
 	private void ClearCustomDocumentProperties() {
