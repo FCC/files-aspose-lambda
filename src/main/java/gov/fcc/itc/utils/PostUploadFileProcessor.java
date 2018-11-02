@@ -931,11 +931,11 @@ public class PostUploadFileProcessor {
 	}
 	
 	private boolean hasOnlyImages(com.aspose.pdf.Document doc) {
-		OperatorSelector os;
+		com.aspose.pdf.OperatorSelector os;
 		com.aspose.pdf.PageCollection pc = doc.getPages();
 		Iterator it = pc.iterator();
 		while (it.hasNext()) {
-			os = new OperatorSelector(new Operator.ShowText());
+			os = new com.aspose.pdf.OperatorSelector(new com.aspose.pdf.operators.ShowText());
 			com.aspose.pdf.Page page = (com.aspose.pdf.Page) it.next();
 			page.getContents().accept(os);
 			if (os.getSelected().size() != 0) {
